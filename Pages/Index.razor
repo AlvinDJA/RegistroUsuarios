@@ -1,0 +1,83 @@
+﻿@page "/"
+@using RegistroUsuarios.BLL
+
+
+<AuthorizeView>
+
+    <NotAuthorized>
+        Necesita  <a href="Identity/Account/Login">Iniciar sesión</a> o  <a href="Identity/Account/Register">Registrarse</a> para acceder a consulta de usuarios
+    </NotAuthorized>
+    <Authorized>
+        <div class="card-img">
+            <div class="card-header">
+                <h1>Consulta de usuarios</h1>
+            </div>
+
+            <div class="card-body">
+
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-primary input-group-text" @onclick="@(u => Consultar())" disabled="@VisibleProperty">
+                        <i class="oi oi-list-rich" />
+                        @if (VisibleProperty)
+                        {
+                            <span>Consultando</span>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        }
+                        else
+                        {
+                            <span>Consultar</span>
+                        }
+                    </button>
+                </div>
+                <form>
+                    <div class="table-responsive text-nowrap" style="position: relative; height:200px; overflow: auto; display: block;">
+                        <table class="table table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>UserName</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white">
+                                @foreach (var item in lista)
+                                {
+                                    <tr>
+                                        <td>@item.Id</td>
+                                        <td>@item.Email.Remove(0,5)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code
+ {
+    private bool VisibleProperty { get; set; } = false;
+
+
+    protected override void OnInitialized()
+    {
+        Nuevo();
+    }
+    private void Nuevo()
+    {
+        lista = new List<Usuarios>();
+    }
+    public List<Usuarios> lista { get; set; }
+
+    [Inject]
+    public UsuariosBLL user { get; set; }
+
+    public async Task Consultar()
+    {
+        this.VisibleProperty = true;
+        lista = await user.GetList(c => true);
+        this.VisibleProperty = false;
+    }
+
+}
